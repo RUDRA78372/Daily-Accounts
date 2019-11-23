@@ -87,8 +87,6 @@ begin
     Memo1.Lines.Add(Label3.Text + '' + Edit3.Text);
   if not(Edit4.Text = '') then
     Memo1.Lines.Add(Label4.Text + '' + Edit4.Text);
-  if not(Edit4.Text = '') then
-    Memo1.Lines.Add(Label4.Text + '' + Edit4.Text);
   if not(Edit5.Text = '') then
     Memo1.Lines.Add(Label5.Text + '' + Edit5.Text);
   if not(Edit6.Text = '') then
