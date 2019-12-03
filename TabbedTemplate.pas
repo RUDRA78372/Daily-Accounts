@@ -7,7 +7,8 @@ uses
   System.Variants,
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.TabControl,
   FMX.StdCtrls, FMX.Gestures, FMX.Edit, FMX.Controls.Presentation, FMX.Layouts,
-  FMX.ListBox, FMX.ScrollBox, FMX.Memo, System.IOUtils, FMX.ExtCtrls;
+  FMX.ListBox, FMX.ScrollBox, FMX.Memo, System.IOUtils, FMX.ExtCtrls,
+  FMX.DateTimeCtrls;
 
 type
   TTabbedForm = class(TForm)
@@ -51,6 +52,7 @@ type
     ImageViewer2: TImageViewer;
     Memo3: TMemo;
     StyleBook1: TStyleBook;
+    DateEdit1: TDateEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormGesture(Sender: TObject; const EventInfo: TGestureEventInfo;
       var Handled: Boolean);
@@ -109,8 +111,9 @@ begin
     Showmessage('Please calculate the day before saving')
   else
   begin
+  DateEdit1.TodayDefault:=True;
     Day := Day + 1;
-    ListBox1.Items.Add('Day ' + inttostr(Day));
+    ListBox1.Items.Add(Format('%s',[FormatDateTime('dddd, mmmm d,yyyy', DateEdit1.Date)]));
     Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
       inttostr(Day) + '.txt');
     ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetHomePath) +
@@ -162,6 +165,7 @@ begin
     ListBox1.Items.LoadFromFile(IncludeTrailingBackslash(TPath.GetHomePath) +
       'List.txt');
   Day := ListBox1.Items.Count;
+  DateEdit1.TodayDefault:=True;
 end;
 
 procedure TTabbedForm.FormGesture(Sender: TObject;
