@@ -8,7 +8,7 @@ uses
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.TabControl,
   FMX.StdCtrls, FMX.Gestures, FMX.Edit, FMX.Controls.Presentation, FMX.Layouts,
   FMX.ListBox, FMX.ScrollBox, FMX.Memo, System.IOUtils, FMX.ExtCtrls,
-  FMX.DateTimeCtrls;
+  FMX.DateTimeCtrls,FMX.DialogService.async;
 
 type
   TTabbedForm = class(TForm)
@@ -53,6 +53,7 @@ type
     Memo3: TMemo;
     StyleBook1: TStyleBook;
     DateEdit1: TDateEdit;
+    Button5: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormGesture(Sender: TObject; const EventInfo: TGestureEventInfo;
       var Handled: Boolean);
@@ -60,6 +61,7 @@ type
     procedure Button4Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -155,6 +157,24 @@ begin
   if not(Edit9.Text = '') then
     T := T + strtoint(Edit9.Text);
   Memo1.Lines.Add(Button4.Text + ': ' + inttostr(T));
+end;
+
+procedure TTabbedForm.Button5Click(Sender: TObject);
+begin
+
+  FMX.DialogService.Async.TDialogServiceAsync.MessageDialog('Delete this day?',
+    System.UITypes.TMsgDlgType.mtConfirmation, [System.UITypes.TMsgDlgBTN.mbYes,
+    System.UITypes.TMsgDlgBTN.mbNo], System.UITypes.TMsgDlgBTN.mbNo, 0,
+    procedure(const AResult: TModalResult)
+    begin
+      if AResult = 6 then
+      begin
+        if Fileexists(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
+      inttostr(ListBox1.ItemIndex + 1) + '.txt') then
+      TFile.Delete(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
+      inttostr(ListBox1.ItemIndex + 1) + '.txt');
+      end;
+    end);
 end;
 
 procedure TTabbedForm.FormCreate(Sender: TObject);
