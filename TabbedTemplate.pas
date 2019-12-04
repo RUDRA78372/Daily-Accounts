@@ -8,7 +8,7 @@ uses
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.TabControl,
   FMX.StdCtrls, FMX.Gestures, FMX.Edit, FMX.Controls.Presentation, FMX.Layouts,
   FMX.ListBox, FMX.ScrollBox, FMX.Memo, System.IOUtils, FMX.ExtCtrls,
-  FMX.DateTimeCtrls,FMX.DialogService.async;
+  FMX.DateTimeCtrls, FMX.DialogService.async;
 
 type
   TTabbedForm = class(TForm)
@@ -78,7 +78,6 @@ implementation
 var
   Cl: Boolean = false;
   Cl2: Boolean = false;
-  Day: integer = 0;
 
 procedure TTabbedForm.Button1Click(Sender: TObject);
 begin
@@ -113,12 +112,11 @@ begin
     Showmessage('Please calculate the day before saving')
   else
   begin
-  DateEdit1.TodayDefault:=True;
-    Day := Day + 1;
-    ListBox1.Items.Add(Format('%s',[FormatDateTime('dddd, mmmm d,yyyy', DateEdit1.Date)]));
-    Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
-      inttostr(Day) + '.txt');
-    ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetHomePath) +
+    ListBox1.Items.Add(Format('%s', [FormatDateTime('dddd, mmmm d,yyyy',
+      DateEdit1.Date)]));
+    Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
+      inttostr(ListBox1.Items.Count) + '.txt');
+    ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
       'List.txt');
     Showmessage('Saved');
   end;
@@ -126,10 +124,10 @@ end;
 
 procedure TTabbedForm.Button3Click(Sender: TObject);
 begin
-  if Fileexists(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
-    inttostr(ListBox1.ItemIndex + 1) + '.txt') then
-    Memo2.Lines.LoadFromFile(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
-      inttostr(ListBox1.ItemIndex + 1) + '.txt');
+  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
+    inttostr(ListBox1.ItemIndex+1) + '.txt') then
+    Memo2.Lines.LoadFromFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
+      inttostr(ListBox1.ItemIndex+1) + '.txt');
 end;
 
 procedure TTabbedForm.Button4Click(Sender: TObject);
@@ -162,17 +160,23 @@ end;
 procedure TTabbedForm.Button5Click(Sender: TObject);
 begin
 
-  FMX.DialogService.Async.TDialogServiceAsync.MessageDialog('Delete this day?',
+  FMX.DialogService.async.TDialogServiceAsync.MessageDialog('Delete this day?',
     System.UITypes.TMsgDlgType.mtConfirmation, [System.UITypes.TMsgDlgBTN.mbYes,
     System.UITypes.TMsgDlgBTN.mbNo], System.UITypes.TMsgDlgBTN.mbNo, 0,
     procedure(const AResult: TModalResult)
     begin
       if AResult = 6 then
       begin
-        if Fileexists(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
-      inttostr(ListBox1.ItemIndex + 1) + '.txt') then
-      TFile.Delete(IncludeTrailingBackslash(TPath.GetHomePath) + '' +
-      inttostr(ListBox1.ItemIndex + 1) + '.txt');
+        if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
+          inttostr(ListBox1.ItemIndex+1) + '.txt') then
+        begin
+          TFile.Delete(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
+            inttostr(ListBox1.ItemIndex+1) + '.txt');
+          ListBox1.Items.Delete(ListBox1.ItemIndex);
+          ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath)
+            + 'List.txt');
+            Memo2.Lines.Clear;
+        end;
       end;
     end);
 end;
@@ -181,15 +185,14 @@ procedure TTabbedForm.FormCreate(Sender: TObject);
 begin
   { This defines the default active tab at runtime }
   TabControl1.ActiveTab := TabItem1;
-  if Fileexists(IncludeTrailingBackslash(TPath.GetHomePath) + 'List.txt') then
-    ListBox1.Items.LoadFromFile(IncludeTrailingBackslash(TPath.GetHomePath) +
+  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'List.txt') then
+    ListBox1.Items.LoadFromFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
       'List.txt');
-  Day := ListBox1.Items.Count;
-  DateEdit1.TodayDefault:=True;
+  DateEdit1.TodayDefault := True;
 end;
 
 procedure TTabbedForm.FormGesture(Sender: TObject;
-  const EventInfo: TGestureEventInfo; var Handled: Boolean);
+const EventInfo: TGestureEventInfo; var Handled: Boolean);
 begin
 {$IFDEF ANDROID}
   case EventInfo.GestureID of
