@@ -104,30 +104,8 @@ begin
     Memo1.Lines.Add(Label10.Text + '' + Edit10.Text);
   if not(Edit11.Text = '') then
     Memo1.Lines.Add(Label11.Text + '' + Edit11.Text);
-end;
-
-procedure TTabbedForm.Button2Click(Sender: TObject);
-begin
-  if not Cl or not Cl2 then
-    Showmessage('Please calculate the day before saving')
-  else
-  begin
-    ListBox1.Items.Add(Format('%s', [FormatDateTime('dddd, mmmm d,yyyy',
-      DateEdit1.Date)]));
-    Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
-      inttostr(ListBox1.Items.Count) + '.txt');
-    ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
-      'List.txt');
-    Showmessage('Saved');
-  end;
-end;
-
-procedure TTabbedForm.Button3Click(Sender: TObject);
-begin
-  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
-    inttostr(ListBox1.ItemIndex+1) + '.txt') then
-    Memo2.Lines.LoadFromFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
-      inttostr(ListBox1.ItemIndex+1) + '.txt');
+  Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath)
+    + 'Buffer.txt');
 end;
 
 procedure TTabbedForm.Button4Click(Sender: TObject);
@@ -155,11 +133,45 @@ begin
   if not(Edit9.Text = '') then
     T := T + strtoint(Edit9.Text);
   Memo1.Lines.Add(Button4.Text + ': ' + inttostr(T));
+  Memo1.Lines.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath)
+    + 'Buffer.txt');
+end;
+
+procedure TTabbedForm.Button2Click(Sender: TObject);
+begin
+  if not Cl or not Cl2 then
+    Showmessage('Please calculate the day before saving')
+  else
+  begin
+    ListBox1.Items.Add(Format('%s', [FormatDateTime('dddd, mmmm d,yyyy',
+      DateEdit1.Date)]));
+
+    Memo1.Lines.SaveToFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + Format('%s',
+      [FormatDateTime('dddd, mmmm d,yyyy', DateEdit1.Date)]) + '.txt');
+    ListBox1.Items.SaveToFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'List.txt');
+    Showmessage('Saved');
+    Memo1.Lines.SaveToFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'Buffer.txt');
+  end;
+end;
+
+procedure TTabbedForm.Button3Click(Sender: TObject);
+begin
+  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
+    ListBox1.Items[ListBox1.ItemIndex] + '.txt') then
+    Memo2.Lines.LoadFromFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + ListBox1.Items
+      [ListBox1.ItemIndex] + '.txt');
 end;
 
 procedure TTabbedForm.Button5Click(Sender: TObject);
+var
+  s: string;
 begin
-
+  s := IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + ListBox1.Items
+    [ListBox1.ItemIndex] + '.txt';
   FMX.DialogService.async.TDialogServiceAsync.MessageDialog('Delete this day?',
     System.UITypes.TMsgDlgType.mtConfirmation, [System.UITypes.TMsgDlgBTN.mbYes,
     System.UITypes.TMsgDlgBTN.mbNo], System.UITypes.TMsgDlgBTN.mbNo, 0,
@@ -167,16 +179,12 @@ begin
     begin
       if AResult = 6 then
       begin
-        if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
-          inttostr(ListBox1.ItemIndex+1) + '.txt') then
-        begin
-          TFile.Delete(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + '' +
-            inttostr(ListBox1.ItemIndex+1) + '.txt');
-          ListBox1.Items.Delete(ListBox1.ItemIndex);
-          ListBox1.Items.SaveToFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath)
-            + 'List.txt');
-            Memo2.Lines.Clear;
-        end;
+        ListBox1.Items.Delete(ListBox1.ItemIndex);
+        ListBox1.Items.SaveToFile(IncludeTrailingBackslash
+          (TPath.GetSharedDocumentsPath) + 'List.txt');
+        Memo2.Lines.Clear;
+        if Fileexists(s) then
+          TFile.Delete(s);
       end;
     end);
 end;
@@ -185,9 +193,14 @@ procedure TTabbedForm.FormCreate(Sender: TObject);
 begin
   { This defines the default active tab at runtime }
   TabControl1.ActiveTab := TabItem1;
-  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'List.txt') then
-    ListBox1.Items.LoadFromFile(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
-      'List.txt');
+  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
+    'List.txt') then
+    ListBox1.Items.LoadFromFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'List.txt');
+  if Fileexists(IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) +
+    'Buffer.txt') then
+    Memo1.Lines.LoadFromFile
+      (IncludeTrailingBackslash(TPath.GetSharedDocumentsPath) + 'Buffer.txt');
   DateEdit1.TodayDefault := True;
 end;
 
